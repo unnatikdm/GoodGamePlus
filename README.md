@@ -33,7 +33,7 @@ This project includes a suite of tools aimed at improving safety in gaming and e
    - To start the API, navigate to the directory containing the `DataEncryption.py` file.
    - Install the required dependencies:
      bash:
-     pip install flask cryptography
+     pip install all_librarynames_imported_inthefile
      
    - Run the API:
      bash
