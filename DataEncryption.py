@@ -6,7 +6,7 @@ binary data, images, videos, and other files.
 The encrypted data can be decrypted 
 using the same key that is generated during the encryption process.
 """
-
+ 
 import os
 import json
 from flask import Flask, request, jsonify
@@ -18,12 +18,23 @@ cipher = Fernet(key)
 
 @app.route('/encrypt', methods=['POST'])
 def encrypt_data():
-    data = request.get_json().get("data")
-    if not data:
-        return jsonify({"error": "No data provided for encryption"}), 400
+    # If the input is a file, it will come through request.files
+    file = request.files.get('file')
+    data = request.form.get('data')  # For structured data like strings or JSON
+    
+    if not (data or file):
+        return jsonify({"error": "No data or file provided for encryption"}), 400
+    
+    if file:
+        # Encrypt file data
+        encrypted_data = encrypt_unknown_input(file.read(), 'binary')
+        return jsonify({
+            "encrypted_data": encrypted_data.decode(),
+            "key": key.decode()
+        })
     
     input_type = detect_input_type(data)
-    encrypted_data = encrypt_unknown_input(data)
+    encrypted_data = encrypt_unknown_input(data, input_type)
     
     return jsonify({
         "encrypted_data": encrypted_data.decode(),
@@ -44,29 +55,16 @@ def decrypt_data():
     })
 
 def detect_input_type(data):
-    if isinstance(data, (dict, list)):
-        return "structured"
-    elif isinstance(data, str):
+    if isinstance(data, str):
         try:
-            json.loads(data)
+            json.loads(data)  # Try to load as JSON
             return "structured"
         except json.JSONDecodeError:
             return "string"
-    elif isinstance(data, bytes):
-        return "binary"
-    elif os.path.isfile(data):
-        ext = os.path.splitext(data)[1].lower()
-        if ext in [".jpg", ".jpeg", ".png"]:
-            return "image"
-        elif ext in [".mp4", ".avi", ".mov"]:
-            return "video"
-        else:
-            return "file"
     else:
-        raise ValueError("Unsupported input type.")
+        return "string"
 
-def encrypt_unknown_input(data):
-    input_type = detect_input_type(data)
+def encrypt_unknown_input(data, input_type):
     if input_type == "structured":
         serialized_data = json.dumps(data).encode()
         return cipher.encrypt(serialized_data)
@@ -74,25 +72,21 @@ def encrypt_unknown_input(data):
         return cipher.encrypt(data.encode())
     elif input_type == "binary":
         return cipher.encrypt(data)
-    elif input_type in ["image", "video", "file"]:
-        with open(data, "rb") as file:
-            binary_data = file.read()
-        return cipher.encrypt(binary_data)
     else:
         raise ValueError("Unsupported input type for encryption.")
 
-def decrypt_unknown_input(encrypted_data, output_path=None, is_binary=False):
+def decrypt_unknown_input(encrypted_data):
     decrypted_data = cipher.decrypt(encrypted_data)
-    if is_binary or output_path:
-        if output_path:
-            with open(output_path, "wb") as file:
-                file.write(decrypted_data)
-            return f"Decrypted data saved to {output_path}"
-        return decrypted_data
+    
     try:
+        # Try to parse as JSON
         return json.loads(decrypted_data.decode())
     except json.JSONDecodeError:
-        return decrypted_data.decode()
+        # If not JSON, return as plain text or binary
+        try:
+            return decrypted_data.decode()  # Return plain text if it's a string
+        except UnicodeDecodeError:
+            return "Binary data could not be decoded."
 
 if __name__ == "__main__":
     app.run(debug=True)
