@@ -1,11 +1,11 @@
+"""
+Flask API for encrypting and decrypting data. Supports JSON, text, and files.
+Uses cryptography.ferne for data handling.
+Endpoints: `/encrypt` and `/decrypt`
+Encrypted data is base64-encode
+"""
 
-"""
-This allows the encryption and decryption of data provided by the user. 
-The API supports various types of input, including structured data (JSON), strings, 
-binary data, images, videos, and other files. 
-The encrypted data can be decrypted 
-using the same key that is generated during the encryption process.
-"""
+
 import os
 import json
 from flask import Flask, request, jsonify
