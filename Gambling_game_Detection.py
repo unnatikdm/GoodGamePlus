@@ -1,7 +1,8 @@
 """
-This provides a service to detect whether a game involves gambling based on its metadata.
-The game is considered gambling if it includes betting, randomness, and rewards.
-If any of the necessary metadata is missing, it could indicate a potential threat or incomplete data.
+Flask API to detect if a game involves gambling based on metadata.
+three key indicators: betting/wagering, randomness, and rewards.
+Returns whether the game is gambling and handles invalid or missing metadata.
+Endpoint: `/detect_gambling_game`
 """
 from flask import Flask, request, jsonify
 
