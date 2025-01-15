@@ -1,3 +1,10 @@
+"""
+Flask API to monitor system resource usage in real-time.
+Tracks camera, microphone, photos access, CPU, and memory usage.
+Endpoint: /status.
+Uses threading for continuous system resource monitoring.
+Supports cross-platform.
+"""
 import os
 import psutil
 import cv2
