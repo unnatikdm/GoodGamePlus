@@ -1,43 +1,112 @@
-# SafeGamingAPI
+# SafeGamingApi
 
-# Game Safety and Data Encryption Project
+SafeGamingApi is a collection of Flask-based APIs designed to enhance the safety, security, and transparency of gaming environments. The suite includes tools for monitoring game file integrity, detecting threats in voice chat, sending timely reminders to players, monitoring system resources, filtering swear words, detecting gambling elements in games, and encrypting sensitive data.
 
-This project includes a suite of tools aimed at improving safety in gaming and ensuring secure handling of user data. The components of the project are designed to address issues such as gambling detection, hate speech filtering, voice threat detection, and time-based reminders during gameplay, along with secure encryption for sensitive data.
+## Features
 
-## Components
+1. **Game File Integrity Monitoring**
+   - **File**: `Game_transparency.py`
+   - **Description**: Monitors the integrity of critical game files and checks if they exist.
+   - **Endpoint**: `/status` (GET)
+   - **Customization**: Set `GAME_FILES_DIR` and `critical_files` to match your game's directory and critical files.
 
-### 1. **DataEncryption.py**
-   - This module provides functionality to securely encrypt and decrypt different types of data. It uses `cryptography.fernet` for symmetric encryption. The module handles structured data, strings, binary data, images, videos, and other files, and returns encrypted data that can only be decrypted with the same key.
+2. **Voice Threat Detection**
+   - **File**: `Voice_Threat_Detection.py`
+   - **Description**: Preprocesses and balances a dataset of labeled sentences, uses a Sentence Transformer model to encode sentences, and calculates cosine similarity for threat detection. Supports real-time voice input for threat detection.
+   - **Features**:
+     - Dataset loading and cleaning
+     - Dataset balancing
+     - Bulk and real-time threat detection
+     - Evaluation metrics (accuracy, precision, recall)
+     - Misclassified examples export
 
-### 2. **Gambling_game_Detection.py**
-   - This module detects whether a game has gambling elements based on the provided metadata. It checks for certain characteristics such as the presence of bets, randomness, and rewards, which are typical indicators of gambling in games.
+3. **Timely Reminders**
+   - **File**: `TimelyReminder.py`
+   - **Description**: Sends periodic reminders to players to take breaks. Tracks playtime and supports custom reminders.
+   - **Endpoints**:
+     - `/start_game_timer` (POST): Starts a timer for a user.
+     - `/get_reminders` (GET): Retrieves reminders for a user.
+   - **Customization**: Set `reminder_interval_minutes` and `max_reminders`.
 
-### 3. **HarshwordsEncryption.py**
-   - This module is designed to detect and filter out harsh or offensive words from text inputs. It loads a list of offensive words and uses pattern matching to detect variations of those words, replacing them with asterisks (`***`). This can be used to ensure a safe and respectful environment in online games and chat applications.
+4. **Real-Time System Resource Monitoring**
+   - **File**: `RealtimeDataTaken.py`
+   - **Description**: Monitors system resource usage in real-time, including camera, microphone, photos access, CPU, and memory usage.
+   - **Endpoint**: `/status` (GET)
+   - **Features**: Cross-platform support, continuous monitoring via threading.
 
-### 4. **TimelyReminder.py**
-   - This module provides a reminder system that alerts users when they've been playing for a certain amount of time. It generates reminders every 30 minutes, prompting users to take breaks. This helps promote healthy gaming habits and prevent excessive screen time.
+5. **Swear Words Filtering**
+   - **File**: `HarshwordsEncryption.py`
+   - **Description**: Filters swear words from input text and replaces them with '***'.
+   - **Endpoint**: `/filter_swear_words` (POST)
+   - **Requirements**: A CSV file (`harshwords.txt`) containing swear words.
 
-### 5. **Voice_Threat_Detection.py**
-   - This module uses machine learning or AI techniques to detect threatening voice inputs during gameplay or interactions. It helps ensure a safe and non-toxic environment for players.
+6. **Gambling Game Detection**
+   - **File**: `Gambling_game_Detection.py`
+   - **Description**: Detects if a game involves gambling based on metadata. Checks for betting/wagering, randomness, and rewards.
+   - **Endpoint**: `/detect_gambling_game` (POST)
+   - **Features**: Handles invalid or missing metadata.
 
-### 6. **hate_speech.tsv**
-   - A dataset containing examples of hate speech. This dataset is used for training models to detect hate speech in conversations, enabling the identification and filtering of inappropriate content in real-time used in **HarshwordsEncryption.py**.
+7. **Data Encryption**
+   - **File**: `DataEncryption.py`
+   - **Description**: Encrypts and decrypts data using the `cryptography.fernet` library. Supports JSON, text, and files.
+   - **Endpoints**:
+     - `/encrypt` (POST): Encrypts data or files.
+     - `/decrypt` (POST): Decrypts data or files.
+   - **Features**: Base64 encoding of encrypted data, automatic key generation.
 
-### 7. **mainxlsx.xlsx**
-   - A dataset that contains additional sentences and labels, likely used for detecting threats or offensive language within text, to be used in conjunction with the `Voice_Threat_Detection.py` module.
+## Installation
 
-## How to Use
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/SafeGamingApi.git
+   cd SafeGamingApi
+   ```
 
-### 1. **Running the Flask API:**
-   - To start the API, navigate to the directory containing the `DataEncryption.py` file.
-   - Install the required dependencies:
-     bash:
-     pip install all_librarynames_imported_inthefile
-     
-   - Run the API:
-     bash
-     python FileName.py
-     
-   - The API will expose two endpoints: `/encrypt` and `/decrypt`, which you can use to send and receive encrypted/decrypted data.
+2. Install the required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
+3. Run the desired API script:
+   ```bash
+   python Game_transparency.py
+   ```
+
+## Usage
+
+Each API script can be run independently. Refer to the individual script documentation for specific usage instructions and endpoint details.
+
+## Requirements
+
+- Python 3.7+
+- Flask
+- pandas
+- sentence-transformers
+- scikit-learn
+- speechrecognition
+- psutil
+- opencv-python
+- pyaudio
+- cryptography
+
+## Contributing
+
+Contributions are welcome! Please fork the repository and submit a pull request with your changes.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Flask for providing a lightweight web framework.
+- Sentence Transformers for powerful sentence embeddings.
+- Cryptography library for secure data encryption.
+
+## Contact
+
+For any questions or suggestions, please open an issue on GitHub or contact the maintainer directly.
+
+---
+
+Feel free to customize this README to better fit your project's needs!
