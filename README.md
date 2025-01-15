@@ -93,20 +93,9 @@ Each API script can be run independently. Refer to the individual script documen
 
 Contributions are welcome! Please fork the repository and submit a pull request with your changes.
 
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
 ## Acknowledgments
 
 - Flask for providing a lightweight web framework.
 - Sentence Transformers for powerful sentence embeddings.
 - Cryptography library for secure data encryption.
 
-## Contact
-
-For any questions or suggestions, please open an issue on GitHub or contact the maintainer directly.
-
----
-
-Feel free to customize this README to better fit your project's needs!
