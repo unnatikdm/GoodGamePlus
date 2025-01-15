@@ -1,9 +1,11 @@
 """
-This a game play reminder system. It sends periodic reminders to the player
-after a specified interval (default 30 minutes). It tracks the time elapsed since the game started 
-and reminds the player to take breaks after a certain period of play. The player will receive up to 
-a maximum number of reminders (default 5).
+Sends periodic reminders to players.
+Tracks playtime and reminds players to take breaks at specified intervals (default: 30 minutes).
+Supports custom reminders and a maximum number of reminders (default: 5).
+Endpoints: `/start_game_timer` (POST) and `/get_reminders` (GET).
+Uses threading for asynchronous reminder delivery.
 """
+
 from flask import Flask, jsonify, request
 import time
 import threading
