@@ -1,8 +1,8 @@
 """
-This script provides a Flask API that filters out swear words and their common variations from input text.
-The API endpoint `/filter_swear_words` accepts a POST request with a text payload and returns the filtered text with swear words replaced by '***'.
-
-
+Flask API to filter swear words from input text. Replaces swear words with '***'
+Endpoint: /filter_swear_words
+Validates input and returns filtered text with a success message.
+Needs a CSV file (`harshwords.txt`) containing swear words.
 """
 from flask import Flask, request, jsonify
 import pandas as pd
