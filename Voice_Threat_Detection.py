@@ -1,10 +1,10 @@
 """
-Detect threats in sentences, including those input via voice. 
-It uses a Hinglish dataset to train a model and detects threats in text and voice inputs. 
-The script includes functions to load, clean, and balance the dataset, evaluate the model 
-using various thresholds, and perform threat detection via both bulk sentence comparison 
-and voice recognition.
+It preprocesses and balances a dataset of labeled sentences. 
+Uses a Sentence Transformer model to encode the sentences and calculate cosine similarity for threat detection.
+Includes evaluation metrics (accuracy, precision, recall) and exports misclassified examples.
+Supports real-time voice input for threat detection via speech recognition
 """
+
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
