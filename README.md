@@ -125,21 +125,6 @@ Each API script can be run independently. Refer to the individual script documen
 
 ---
 
-## **Contributing**
-
-Contributions are welcome! Please fork the repository and submit a pull request with your changes.
-
----
-
-## **Acknowledgments**
-
-- Flask for providing a lightweight web framework.
-- Sentence Transformers for powerful sentence embeddings.
-- Cryptography library for secure data encryption.
-- Face Recognition library for facial verification.
-
----
-
 ## **File Descriptions**
 
 | **File**                     | **Description**                                                                 |
@@ -157,35 +142,3 @@ Contributions are welcome! Please fork the repository and submit a pull request 
 | `mainxlsx.xlsx`               | Dataset for threat detection (used in `Voice_Threat_Detection.py`).             |
 
 ---
-
-## **Example Requests**
-
-### **Fraud Detection API**
-1. **Verify a User**:
-   ```bash
-   curl -X POST -F "id_photo=@id.jpg" -F "selfie=@selfie.jpg" http://0.0.0.0:5000/verify
-   ```
-
-2. **Send a Gift**:
-   ```bash
-   curl -X POST -H "Content-Type: application/json" -d '{
-       "sender_id": "123",
-       "receiver_id": "456",
-       "condition": "✌🏻",
-       "is_approved": true
-   }' http://0.0.0.0:5000/send_gift
-   ```
-
----
-
-## **Future Enhancements**
-1. **Database Integration**:
-   - Store user verification results and gift transactions in a database.
-2. **Multi-Factor Authentication**:
-   - Add additional verification steps (e.g., OTP, email confirmation).
-3. **Rate Limiting**:
-   - Prevent abuse by limiting the number of verification attempts.
-
----
-
-This README provides a complete overview of your project, including all files and their functionalities. Let me know if you need further adjustments!
