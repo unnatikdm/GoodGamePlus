@@ -70,10 +70,6 @@ SafeGamingApi is a collection of Flask-based APIs designed to enhance the safety
 
 ---
 
-Got it! Here's the **Fraud Detection** section formatted with `#`, `*`, and other Markdown elements for your `README.md` file:
-
----
-
 ## **8. Fraud Detection**
 * **File**: `fraud_detection.py`
 * **Description**: Verifies receivers via facial recognition using ID and selfie photos. Approves receivers for receiving gifts if verification is successful. Includes a random hand emoji condition for added security.
@@ -84,7 +80,6 @@ Got it! Here's the **Fraud Detection** section formatted with `#`, `*`, and othe
   * Facial recognition for receiver verification.
   * Random hand emoji condition for verification.
   * Prevents unauthorized gift sending to unverified receivers.
-  * Tracks approved receivers and their verification conditions.
 
 ---
 
