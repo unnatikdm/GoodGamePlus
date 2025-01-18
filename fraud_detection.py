@@ -1,11 +1,10 @@
 """
-Flask API for user verification and gift sending.
-Verifies users via facial recognition using ID and selfie photos.
-Approves users for sending gifts if verification is successful.
-Supports random hand emoji conditions
+Flask API for receiver verification and gift sending.
+Verifies receivers via facial recognition using ID and selfie photos.
+Approves receivers for receiving gifts if verification is successful.
+Supports random hand emoji conditions.
 Endpoints: /verify (POST), /send_gift (POST).
 """
-
 from flask import Flask, request, jsonify
 import cv2
 import face_recognition
@@ -21,6 +20,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png"}
+
+approved_receivers = {}
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -51,7 +52,7 @@ def get_random_hand_emoji():
     return random.choice(hand_emojis)
 
 @app.route("/verify", methods=["POST"])
-def verify_user():
+def verify_receiver():
     if "id_photo" not in request.files or "selfie" not in request.files:
         return jsonify({"error": "ID photo and selfie are required"}), 400
 
@@ -74,8 +75,18 @@ def verify_user():
     if not verify_selfie(id_photo_path, selfie_path):
         return jsonify({"error": "Selfie verification failed"}), 400
 
+    receiver_id = request.form.get("receiver_id")
+    if not receiver_id:
+        return jsonify({"error": "Receiver ID is required"}), 400
+
+    approved_receivers[receiver_id] = {
+        "condition": condition,
+        "status": "approved"
+    }
+
     return jsonify({
-        "message": "Verification successful",
+        "message": "Receiver verification successful",
+        "receiver_id": receiver_id,
         "condition": condition,
         "status": "approved"
     }), 200
@@ -86,15 +97,17 @@ def send_gift():
     sender_id = data.get("sender_id")
     receiver_id = data.get("receiver_id")
     condition = data.get("condition")
-    is_approved = data.get("is_approved")
 
-    if not sender_id or not receiver_id or not condition or is_approved is None:
-        return jsonify({"error": "Sender ID, receiver ID, condition, and approval status are required"}), 400
+    if not sender_id or not receiver_id or not condition:
+        return jsonify({"error": "Sender ID, receiver ID, and condition are required"}), 400
 
-    if not is_approved:
-        return jsonify({"error": "Sender is not approved to send gifts"}), 403
+    if receiver_id not in approved_receivers:
+        return jsonify({"error": "Receiver is not verified"}), 403
 
-    print(f"Sender {sender_id} is sending a gift to receiver {receiver_id} with condition: {condition}")
+    if approved_receivers[receiver_id]["condition"] != condition:
+        return jsonify({"error": "Invalid condition for receiver"}), 403
+
+    print(f"Receiver {receiver_id} has received a gift from sender {sender_id} with condition: {condition}")
     return jsonify({
         "message": "Gift sent successfully",
         "sender_id": sender_id,
@@ -104,4 +117,4 @@ def send_gift():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-  
+   
