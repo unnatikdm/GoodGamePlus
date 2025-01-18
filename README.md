@@ -1,7 +1,3 @@
-Here’s a **README.md** file that includes all the information you provided, along with details about `fraud_detection.py`. This README is comprehensive and covers all the files in your project.
-
----
-
 # **SafeGamingApi**
 
 SafeGamingApi is a collection of Flask-based APIs designed to enhance the safety, security, and transparency of gaming environments. The suite includes tools for monitoring game file integrity, detecting threats in voice chat, sending timely reminders to players, monitoring system resources, filtering swear words, detecting gambling elements in games, encrypting sensitive data, and preventing fraud.
