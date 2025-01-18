@@ -73,4 +73,4 @@ if __name__ == "__main__":
     monitor_thread = threading.Thread(target=check_system_resources)
     monitor_thread.daemon = True
     monitor_thread.start()
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
