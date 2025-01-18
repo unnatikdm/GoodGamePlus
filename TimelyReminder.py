@@ -17,9 +17,10 @@ user_timers = {}
 def reminder_message(play_duration_minutes):
     hours, minutes = divmod(play_duration_minutes, 60)
     if hours > 0:
-        return f"It's been {hours} hour(s) and {minutes} minute(s) since you started playing. Take a break if needed!"
+        return f"It's been {hours} hour(s) and {minutes} minute(s) since you started playing. Take a break and go for a walk around the nature!!!"
     else:
-        return f"It's been {minutes} minute(s) since you started playing. Time flies!"
+        return f"It's been {minutes} minute(s) since you started playing. Take a break and go for a walk around the nature!!!"
+        
 
 def game_play_timer(user_id, reminder_interval_minutes, max_reminders, custom_message=None):
     start_time = time.time()
