@@ -1,30 +1,24 @@
 """
-Sends periodic reminders to players.
-Tracks playtime and reminds players to take breaks at specified intervals (default: 30 minutes).
-Supports custom reminders and a maximum number of reminders (default: 5).
-Endpoints: `/start_game_timer` (POST) and `/get_reminders` (GET).
-Uses threading for asynchronous reminder delivery.
+This script provides a timer application with two modes: Default Timer and Parental Timer.
+The Default Timer sends periodic reminders to take breaks, while the Parental Timer runs for a user-specified duration.
+After each timer session, the user is prompted to enter a password to continue or exit.
+The application uses Flask to handle HTTP requests and runs in the background while accepting user input in the terminal.
+The program loops until the user chooses to exit, supporting multiple rounds of playtime with password verification.
 """
-
 from flask import Flask, jsonify, request
 import time
 import threading
-import getpass  # For password input in the terminal
-import os  # For os._exit() to forcefully exit the application
+import getpass  
+import os  
 
 app = Flask(__name__)
 
-# Store user timers and reminders in a dictionary
 user_timers = {}
 
-# Hardcoded user data and settings
 user_id = "player1"
-reminder_interval_seconds = 2  # 2 seconds for faster testing
-max_reminders = 3  # 3 reminders max
 custom_message = "Take a break and stretch your legs!"
-password = "securePassword"  # Define the password to check after 3 reminders
+password = "securePassword"  
 
-# Default reminder message
 def reminder_message(play_duration_seconds):
     minutes, seconds = divmod(play_duration_seconds, 60)
     if minutes > 0:
@@ -32,103 +26,75 @@ def reminder_message(play_duration_seconds):
     else:
         return f"It's been {seconds} second(s) since you started playing. {custom_message}"
 
-# Function to ask for a password after 3 reminders
 def ask_for_password():
     user_input = getpass.getpass("Enter the password to continue: ")
     if user_input != password:
         print("Incorrect password. Exiting...")
-        shutdown_flask()  # Call the function to shut down Flask if password is incorrect
+        shutdown_flask()
     else:
-        print("Password correct. Continuing...")
+        print("Password correct. Continuing to the next round...")
 
-# Function to forcefully exit the Flask server
 def shutdown_flask():
     print("Shutting down the server...")
-    os._exit(0)  # Exit the program immediately
+    os._exit(0)
 
-# The function that runs the timer and sends periodic reminders
-def game_play_timer(user_id, reminder_interval_seconds, max_reminders, custom_message=None):
-    start_time = time.time()  # Track the start time
+def game_play_timer_default(user_id, reminder_interval_seconds, max_reminders, custom_message=None):
+    if user_id not in user_timers:
+        user_timers[user_id] = {"reminders": []}
+
+    start_time = time.time()
     reminder_count = 0
-    reminders = []  # List to store all reminders for the user
+    reminders = []
 
-    while True:
-        while reminder_count < max_reminders:
-            time.sleep(reminder_interval_seconds)  # Wait for the interval time
-
-            # Calculate elapsed time in seconds
-            elapsed_time = (time.time() - start_time)
-
-            # Use custom message if provided, else use default
-            reminder_msg = custom_message if custom_message else reminder_message(elapsed_time)
-            reminders.append(reminder_msg)  # Add reminder to list
-            reminder_count += 1
-
-            # Print the reminder message to the console
-            print(reminder_msg)
-
-            # Save the current reminders in the user_timers dictionary
-            user_timers[user_id]["reminders"] = reminders
-
-        # After max reminders, ask for password and check it
-        print("Reminder limit reached. Please enter the password to continue...")
-
-        # Start a separate thread to handle password input without blocking Flask
-        password_thread = threading.Thread(target=ask_for_password)
-        password_thread.start()
-        password_thread.join()  # Wait for the password check to finish
-
-        # Reset reminder count and start again
-        reminder_count = 0
-        reminders = []  # Reset the reminders for the next round
+    while reminder_count < max_reminders:
+        time.sleep(reminder_interval_seconds)
+        elapsed_time = (time.time() - start_time)
+        reminder_msg = custom_message if custom_message else reminder_message(elapsed_time)
+        reminders.append(reminder_msg)
+        reminder_count += 1
+        print(reminder_msg)
         user_timers[user_id]["reminders"] = reminders
 
-        # Optionally, you can reset the game timer start_time if needed for the new round
-        start_time = time.time()
+    print("Reminder limit reached. Please enter the password to continue...")
+    password_thread = threading.Thread(target=ask_for_password)
+    password_thread.start()
+    password_thread.join()
 
-@app.route('/start_game_timer', methods=['POST'])
-def start_game_timer():
-    # Initialize the user timer with hardcoded data
-    user_timers[user_id] = {
-        "status": "running",
-        "start_time": time.time(),
-        "reminders": []
-    }
+def game_play_timer_parental(user_id, play_duration_seconds, custom_message=None):
+    start_time = time.time()
 
-    # Start the timer in a separate thread
-    timer_thread = threading.Thread(
-        target=game_play_timer,
-        args=(user_id, reminder_interval_seconds, max_reminders, custom_message)
-    )
-    timer_thread.daemon = True  # Allow the thread to run in the background
-    timer_thread.start()
+    while time.time() - start_time < play_duration_seconds:
+        time.sleep(1)
 
-    return jsonify({
-        "message": "Game timer started successfully.",
-        "user_id": user_id,
-        "interval_seconds": reminder_interval_seconds,
-        "max_reminders": max_reminders,
-        "custom_message": custom_message
-    })
+    elapsed_time = time.time() - start_time
+    reminder_msg = custom_message if custom_message else reminder_message(elapsed_time)
+    print(reminder_msg)
 
-@app.route('/get_reminders', methods=['GET'])
-def get_reminders():
-    # Fetch the reminders for the hardcoded user_id
-    if user_id not in user_timers:
-        return jsonify({"error": "No timer found for this user"}), 404
+    print("Game time finished. Please enter the password to continue.")
+    ask_for_password()
 
-    return jsonify({
-        "user_id": user_id,
-        "status": user_timers[user_id]["status"],
-        "reminders": user_timers[user_id]["reminders"]
-    })
+def choose_timer():
+    while True:
+        choice = input("Enter '1' for Default Timer or '2' for Parental Timer: ")
+        
+        if choice == '1':
+            print("Starting Default Timer (Code 1)...")
+            reminder_interval_seconds = 2  
+            max_reminders = 3  
+            game_play_timer_default(user_id, reminder_interval_seconds, max_reminders, custom_message)
+        elif choice == '2':
+            print("Starting Parental Timer (Code 2)...")
+            play_duration_seconds = int(input("How much time do you want to play (in seconds)? "))
+            game_play_timer_parental(user_id, play_duration_seconds, custom_message)
+        else:
+            print("Invalid choice. Please enter '1' or '2'.")
 
-if __name__ == "__main__":
-    # Ensure the app context is available
-    with app.app_context():
-        # Manually start the timer when the app runs (this is the key fix)
-        start_game_timer()
-
-    # Start the Flask app
+def start_flask_server():
     app.run(host="0.0.0.0", port=5000)
 
+
+if __name__ == "__main__":
+    choose_timer()
+    flask_thread = threading.Thread(target=start_flask_server)
+    flask_thread.daemon = True  
+    flask_thread.start()
