@@ -11,7 +11,7 @@ import speech_recognition as sr
 import os
 from sklearn.utils import resample
 
-# 1. Load and clean the dataset
+
 def load_and_clean_dataset(file_path):
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"Dataset file not found: {file_path}")
@@ -20,7 +20,7 @@ def load_and_clean_dataset(file_path):
     data['labels'] = data['labels'].str.strip().str.lower()
     return data
 
-# 2. Balance the dataset
+
 def balance_dataset(data):
     threat_data = data[data['labels'] == 'yes']
     non_threat_data = data[data['labels'] == 'no']
@@ -28,14 +28,14 @@ def balance_dataset(data):
     balanced_data = pd.concat([threat_data_upsampled, non_threat_data]).sample(frac=1, random_state=42)
     return balanced_data
 
-# 3. Detect threats using cosine similarity
+
 def detect_threat_from_voice(input_text, threat_sentences, model, threshold=0.7):
     input_embedding = model.encode([input_text], show_progress_bar=False)
     similarities = cosine_similarity(input_embedding, threat_sentences)
     is_threat = max(similarities[0]) > threshold
     return 'Yes' if is_threat else 'No'
 
-# 4. Get real-time voice input
+
 def get_voice_input():
     recognizer = sr.Recognizer()
     with sr.Microphone() as source:
@@ -47,7 +47,7 @@ def get_voice_input():
             print(f"Error processing voice input: {e}")
             return None
 
-# 5. Main execution logic for testing voice input
+
 def test_single_sentence_with_voice(threat_sentences, model, threshold=0.85):
     input_text = get_voice_input()
     if not input_text:
@@ -58,7 +58,6 @@ def test_single_sentence_with_voice(threat_sentences, model, threshold=0.85):
     print(f"Threat Detected: {threat_status}")
 
 
-    # Ask for user confirmation if a threat is detected
     if threat_status == 'Yes':
         user_response = input("A system detected a threat. Are you comfortable or is it normal? (Type 'comfortable' or 'normal'): ").strip().lower()
         if user_response == "comfortable":
@@ -68,7 +67,6 @@ def test_single_sentence_with_voice(threat_sentences, model, threshold=0.85):
         else:
             print("Invalid response. Proceeding with default settings.")
 
-# 6. Main method to load the dataset, train the model, and evaluate
 if __name__ == "__main__":
     dataset_path = "C:\\Users\\Isha\\Downloads\\SafeGamingAPI-main\\SafeGamingAPI-main\\mainxlsx.xlsx"  # Provide the actual path to your dataset file
     
