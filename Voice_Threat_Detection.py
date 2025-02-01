@@ -4,15 +4,14 @@ Uses a Sentence Transformer model to encode the sentences and calculate cosine s
 Includes evaluation metrics (accuracy, precision, recall) and exports misclassified examples.
 Supports real-time voice input for threat detection via speech recognition
 """
-
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.metrics import accuracy_score, precision_score, recall_score
-from sklearn.utils import resample
 import speech_recognition as sr
 import os
+from sklearn.utils import resample
 
+# 1. Load and clean the dataset
 def load_and_clean_dataset(file_path):
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"Dataset file not found: {file_path}")
@@ -21,6 +20,7 @@ def load_and_clean_dataset(file_path):
     data['labels'] = data['labels'].str.strip().str.lower()
     return data
 
+# 2. Balance the dataset
 def balance_dataset(data):
     threat_data = data[data['labels'] == 'yes']
     non_threat_data = data[data['labels'] == 'no']
@@ -28,43 +28,26 @@ def balance_dataset(data):
     balanced_data = pd.concat([threat_data_upsampled, non_threat_data]).sample(frac=1, random_state=42)
     return balanced_data
 
-def detect_threats_bulk(input_sentences, threat_embeddings, model, threshold=0.7):
-    input_embeddings = model.encode(input_sentences, batch_size=16, show_progress_bar=False)
-    similarities = cosine_similarity(input_embeddings, threat_embeddings)
-    return [1 if max(row) > threshold else 0 for row in similarities]
-
-def evaluate_model(data, threat_sentences, model, threshold=0.7):
-    predictions = detect_threats_bulk(data['sentences'].tolist(), threat_sentences, model, threshold)
-    labels = [1 if label == 'yes' else 0 for label in data['labels']]
-    accuracy = accuracy_score(labels, predictions)
-    precision = precision_score(labels, predictions)
-    recall = recall_score(labels, predictions)
-    print(f"Threshold: {threshold}")
-    print(f"Accuracy: {accuracy:.2f}")
-    print(f"Precision: {precision:.2f}")
-    print(f"Recall: {recall:.2f}")
-    data['predicted'] = predictions
-    data['is_correct'] = (data['predicted'] == labels)
-    misclassified = data[data['is_correct'] == False]
-    misclassified.to_csv("misclassified_examples.csv", index=False)
-
-def get_voice_input():
-    recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
-        try:
-            print("Speak now:")
-            audio = recognizer.listen(source, timeout=5, phrase_time_limit=10)
-            return recognizer.recognize_google(audio, language='hi-IN')
-        except Exception as e:
-            print(f"Error processing voice input: {e}")
-            return None
-
+# 3. Detect threats using cosine similarity
 def detect_threat_from_voice(input_text, threat_sentences, model, threshold=0.7):
     input_embedding = model.encode([input_text], show_progress_bar=False)
     similarities = cosine_similarity(input_embedding, threat_sentences)
     is_threat = max(similarities[0]) > threshold
     return 'Yes' if is_threat else 'No'
 
+# 4. Get real-time voice input
+def get_voice_input():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        try:
+            print("Speak now:")
+            audio = recognizer.listen(source, timeout=20, phrase_time_limit=10)
+            return recognizer.recognize_google(audio, language='en-IN')
+        except Exception as e:
+            print(f"Error processing voice input: {e}")
+            return None
+
+# 5. Main execution logic for testing voice input
 def test_single_sentence_with_voice(threat_sentences, model, threshold=0.85):
     input_text = get_voice_input()
     if not input_text:
@@ -74,20 +57,32 @@ def test_single_sentence_with_voice(threat_sentences, model, threshold=0.85):
     threat_status = detect_threat_from_voice(input_text, threat_sentences, model, threshold)
     print(f"Threat Detected: {threat_status}")
 
+
+    # Ask for user confirmation if a threat is detected
+    if threat_status == 'Yes':
+        user_response = input("A system detected a threat. Are you comfortable or is it normal? (Type 'comfortable' or 'normal'): ").strip().lower()
+        if user_response == "comfortable":
+            print("Noted. You feel comfortable.")
+        elif user_response == "normal":
+            print("Noted. It is considered normal.")
+        else:
+            print("Invalid response. Proceeding with default settings.")
+
+# 6. Main method to load the dataset, train the model, and evaluate
 if __name__ == "__main__":
-    dataset_path = "/content/mainxlsx.xlsx"
+    dataset_path = "C:\\Users\\Isha\\Downloads\\SafeGamingAPI-main\\SafeGamingAPI-main\\mainxlsx.xlsx"  # Provide the actual path to your dataset file
+    
     try:
         data = load_and_clean_dataset(dataset_path)
         balanced_data = balance_dataset(data)
         threat_sentences = balanced_data[balanced_data['labels'] == 'yes']['sentences'].tolist()
+
         model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
         threat_embeddings = model.encode(threat_sentences, batch_size=16, show_progress_bar=False)
 
-        for threshold in [0.7, 0.75, 0.8, 0.85]:
-            print(f"\nEvaluating with threshold: {threshold}")
-            evaluate_model(balanced_data, threat_embeddings, model, threshold=threshold)
+        # Run the real-time voice threat detection
+        print("Running real-time threat detection...")
+        test_single_sentence_with_voice(threat_embeddings, model, threshold=0.75)
 
-        test_single_sentence_with_voice(threat_embeddings, model, threshold=0.85)
     except Exception as e:
         print(f"An error occurred: {e}")
-
