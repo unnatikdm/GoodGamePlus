@@ -126,6 +126,8 @@ Each API script can be run independently. Refer to the individual script documen
 - pyaudio
 - cryptography
 - face_recognition
+- cmake
+- dlib
 
 ---
 
